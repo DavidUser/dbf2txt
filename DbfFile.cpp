@@ -18,12 +18,14 @@ subject to the following restrictions:
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
+#include <string.h>
 
 DbfFile_c::DbfFile_c(const char *szFileName):
 	clFile(szFileName, std::ios_base::binary | std::ios_base::in)
 {
 	if(!clFile.good())
-		throw std::exception("Cannot open file");
+		throw std::runtime_error("Cannot open file");
 
 	clFile.read(reinterpret_cast<char *>(&stHeader), sizeof(stHeader));
 	size_t sz = sizeof(DbfRecord_s);
@@ -72,6 +74,7 @@ void DbfFile_c::DumpAll(const char *szDestFileName)
 									
 			clFile.read(&vecBuffer[0], record.uLength);
 			out.write(&vecBuffer[0], record.uLength);
+			out << '\t';
 			uTotalBytes += record.uLength;
 		}
 		++uNumRecords;
@@ -120,7 +123,7 @@ void DbfFile_c::DumpFields(const char *szDestFileName, const char **fields, size
 	{
 		std::stringstream stream;
 		stream << "Field not found: " << fields[current];
-		throw std::exception(stream.str().c_str());
+		throw std::runtime_error(stream.str().c_str());
 	}
 
 	//Now build the skip table	
